@@ -4,6 +4,9 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 import Buttonperson from "./components/buttom";
 import DropDown from "./components/dropDown";
 import InputPerson from "./components/input";
+import Passo1 from "./passo1";
+import Passo2 from "./passo2";
+import Passo3 from "./passo3";
 
 type form = {
   nome1: string;
@@ -16,55 +19,64 @@ type form = {
   next3: boolean;
 };
 
+type validation = {
+  passo1: boolean;
+  passo2: boolean;
+  passo3: boolean;
+};
+
 export default function App() {
   const [form, setForm] = useState<form>({} as form);
-
+  const [validation, setValidation] = useState<validation>({} as validation);
+  const [titleButtom, setTitleButtom] = useState("passo 2");
+  function passos() {
+    if (form.next1) {
+      setValidation((props) => ({ ...props, passo1: true }));
+      setTitleButtom("passo3");
+    } else {
+      return alert("passo1 precisa ser validado");
+    }
+    if (form.next2 == undefined) return;
+    if (form.next2) {
+      setValidation((props) => ({ ...props, passo2: true }));
+      setTitleButtom("ponto");
+    } else {
+      return alert("passo2 precisa ser validado");
+    }
+    if (form.next3 == undefined) return;
+    if (form.next3) {
+      setValidation((props) => ({ ...props, passo3: true }));
+    } else {
+      return alert("passo3 precisa ser validado");
+    }
+  }
   return (
     <ScrollView>
       <View style={{ flex: 1, marginTop: 40, alignItems: "center" }}>
-        <DropDown disabled={form.next1} Title="primeiro passo">
+        <DropDown done={validation.passo1} Title="primeiro passo">
           <DropDown Title="sub1">
-            <InputPerson
-              onChangeText={(e) => setForm((props) => ({ ...props, nome1: e }))}
-            ></InputPerson>
+            <Passo1
+              done={(e) => setForm((props) => ({ ...props, next1: e }))}
+            />
           </DropDown>
-          <DropDown Title="sub2">
-            <InputPerson
-              onChangeText={(e) => setForm((props) => ({ ...props, nome2: e }))}
-            ></InputPerson>
-          </DropDown>
-          <DropDown Title="sub3">
-            <InputPerson
-              onChangeText={(e) => setForm((props) => ({ ...props, nome3: e }))}
-            ></InputPerson>
-          </DropDown>
-          <Buttonperson
-            onPress={() => setForm((props) => ({ ...props, next1: true }))}
-            title="proximo"
-          />
         </DropDown>
-        <DropDown disabled={form.next2} Title="segundo passo">
-          <DropDown Title="sub1">
-            <InputPerson
-              onChangeText={(e) => setForm((props) => ({ ...props, nome4: e }))}
-            ></InputPerson>
-          </DropDown>
-          <Buttonperson
-            onPress={() => setForm((props) => ({ ...props, next2: true }))}
-            title="proximo"
-          />
+        <DropDown
+          open={validation.passo1}
+          done={validation.passo2}
+          disabled={!form.next1}
+          Title="segundo passo"
+        >
+          <Passo2 done={(e) => setForm((props) => ({ ...props, next2: e }))} />
         </DropDown>
-        <DropDown disabled={form.next3} Title="terceiro passo">
-          <DropDown Title="sub1">
-            <InputPerson
-              onChangeText={(e) => setForm((props) => ({ ...props, nome5: e }))}
-            ></InputPerson>
-          </DropDown>
-          <Buttonperson
-            onPress={() => setForm((props) => ({ ...props, next3: true }))}
-            title="proximo"
-          />
+        <DropDown
+          open={validation.passo2}
+          done={validation.passo3}
+          disabled={!validation.passo2}
+          Title="terceiro passo"
+        >
+          <Passo3 done={(e) => setForm((props) => ({ ...props, next3: e }))} />
         </DropDown>
+        <Buttonperson onPress={passos} title={titleButtom} />
       </View>
     </ScrollView>
   );

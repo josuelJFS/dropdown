@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { memo, useEffect, useState } from "react";
 import { Container, Header, More, styles, Titulo } from "./style";
 import { AntDesign } from "@expo/vector-icons";
 import Animated, {
@@ -8,7 +8,7 @@ import Animated, {
   Easing,
   withTiming,
 } from "react-native-reanimated";
-import { ScrollView } from "react-native";
+import { ScrollView, View } from "react-native";
 const MoreAnimated = Animated.createAnimatedComponent(More);
 
 type props = {
@@ -16,6 +16,8 @@ type props = {
   children?: any;
   scrollActive?: boolean;
   disabled?: boolean;
+  done?: boolean;
+  open?: boolean;
 };
 
 const DropDown: React.FC<props> = ({
@@ -23,6 +25,8 @@ const DropDown: React.FC<props> = ({
   children,
   scrollActive,
   disabled = false,
+  done = false,
+  open = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const heightValue = useSharedValue(0);
@@ -39,7 +43,12 @@ const DropDown: React.FC<props> = ({
 
   useEffect(() => {
     disabled && setIsOpen(false);
-  }, [disabled]);
+    done && setIsOpen(false);
+  }, [disabled, done]);
+
+  useEffect(() => {
+    setIsOpen(open);
+  }, [open]);
 
   const animatedStyles = useAnimatedStyle(() => {
     return {
@@ -56,7 +65,7 @@ const DropDown: React.FC<props> = ({
         disabled={disabled}
       >
         <Titulo>{Title}</Titulo>
-        {!disabled ? (
+        {!done ? (
           <AntDesign
             name={isOpen ? "caretup" : "caretdown"}
             size={24}
@@ -68,15 +77,19 @@ const DropDown: React.FC<props> = ({
       </Header>
       {scrollActive ? (
         <MoreAnimated style={[styles.sombra, animatedStyles]}>
-          <ScrollView>{isOpen && children}</ScrollView>
+          <ScrollView>
+            <View style={{ display: isOpen ? "flex" : "none" }}>
+              {children}
+            </View>
+          </ScrollView>
         </MoreAnimated>
       ) : (
         <MoreAnimated style={[styles.sombra, animatedStyles]}>
-          {isOpen && children}
+          <View style={{ display: isOpen ? "flex" : "none" }}>{children}</View>
         </MoreAnimated>
       )}
     </Container>
   );
 };
 
-export default DropDown;
+export default memo(DropDown);
